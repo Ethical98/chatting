@@ -6,7 +6,6 @@ import GroupChatScreen from './Screens/GroupChatScreen';
 function App() {
   return (
     <Container>
-      
       <Router>
         <Route path='/' component={GroupChatScreen}></Route>
       </Router>

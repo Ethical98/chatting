@@ -31,10 +31,6 @@ app.use(
 
 app.post('/pusher/auth', (req, res) => {
   const { socket_id, channel_name } = req.body;
-  // console.log(req.body.ID);
-  //console.log(pusher.channel(channelName));
-
-  // Retrieve username from session and use as presence channel user_id
   const presenceData = {
     user_id: req.session.username,
   };
@@ -43,7 +39,7 @@ app.post('/pusher/auth', (req, res) => {
 });
 
 app.post('/join-chat', (req, res) => {
-  // store username in session
+ 
   req.session.username = req.body.username;
   console.log(req.session.username);
   res.json('Joined');
