@@ -23,29 +23,28 @@ const GroupChatScreen = () => {
   const [joined, setJoined] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [username, setUsername] = useState('');
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState('');
   const [messages, setMessages] = useState([]);
   const [status, setStatus] = useState('');
 
   const listen = () => {
     const channel = pusher.subscribe('presence-groupChat');
     channel.bind('message_sent', (data) => {
-      setMessages([
-        ...messages,
+      setMessages((prevState) => [
+        ...prevState,
         { username: data.username, message: data.message },
       ]);
     });
-    console.log(messages);
   };
 
-  const sendMessage = (e) => {
+  const sendMessage = async (e) => {
     e.preventDefault();
     let message = {
       username: username,
       message: newMessage,
     };
     setNewMessage('');
-    axios.post('/send-message', message);
+    await axios.post('/send-message', message);
   };
 
   const onSubmitHandler = async (e) => {
@@ -57,14 +56,11 @@ const GroupChatScreen = () => {
         setJoined(true);
         const channel = pusher.subscribe('presence-groupChat');
         channel.bind('pusher:subscription_succeeded', (members) => {
-          // console.log(members.ids);
-          // setUsers(members);
-          // console.log(users);
+          setUsers(members.count);
         });
 
         channel.bind('pusher:member_added', (member) => {
           setStatus(`${member.id} joined the chat`);
-          //console.log(member);
         });
         listen();
       }
@@ -72,6 +68,7 @@ const GroupChatScreen = () => {
       console.log(error);
     }
   };
+  console.log(users);
 
   return (
     <Container className='my-5'>
@@ -79,14 +76,22 @@ const GroupChatScreen = () => {
         <Col xs={12} md={4}>
           <Card className='p-3'>
             <Card.Title>
-              GROUP CHAT<Badge>{users.length}</Badge>
+              GROUP CHAT
+              {users && (
+                <Badge
+                  variant='primary'
+                  style={{ backgroundColor: 'darkBlue', marginLeft: '32vw' }}
+                >
+                  {users}
+                </Badge>
+              )}
             </Card.Title>
+
             {joined ? (
               <div>
-                <Form.Text>{status}</Form.Text>
                 <ul>
                   {messages.map((message) => (
-                    <li key="">
+                    <li>
                       <div>
                         <div className='header'>
                           <strong className='primary-font'>
@@ -98,6 +103,7 @@ const GroupChatScreen = () => {
                     </li>
                   ))}
                 </ul>
+                <Form.Text>{status}</Form.Text>
                 <Form onSubmit={sendMessage}>
                   <Form.Control
                     required
